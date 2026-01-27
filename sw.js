@@ -1,9 +1,9 @@
-const CACHE_NAME = 'where-am-i-v1';
+const CACHE_NAME = 'where-am-i-v2';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/icon-192.png',
-  '/icon-512.png'
+  './',
+  './index.html',
+  './icon-192.png',
+  './icon-512.png'
 ];
 
 // Install event - cache assets
