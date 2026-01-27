@@ -1,0 +1,33 @@
+{
+  "name": "Where Am I?",
+  "short_name": "Where Am I",
+  "description": "Location-aware app that shows area info and opens relevant apps",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["navigation", "utilities"],
+  "shortcuts": [
+    {
+      "name": "Discover Area",
+      "short_name": "Discover",
+      "description": "See what's around you",
+      "url": "/index.html?action=discover"
+    }
+  ]
+}
