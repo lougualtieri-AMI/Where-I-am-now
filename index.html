@@ -100,13 +100,23 @@
       }, 1000);
     }
 
-    // Read aloud with Speechify, fallback to native TTS
-    function readAloud() {
+    // Read aloud state
+    let isSpeaking = false;
+
+    // Stop speaking
+    function stopSpeaking() {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+      isSpeaking = false;
+      render();
+    }
+
+    // Read aloud with system TTS
+    function readAloudSystem() {
       const text = `You're in ${state.location.city}, ${state.location.state}. ${AREA_DESCRIPTION}. Nearby highlights include ${LOCAL_SUGGESTIONS.map(s => s.name).join(', ')}.`;
       
-      // Try native TTS first (works reliably)
       if ('speechSynthesis' in window) {
-        // Cancel any ongoing speech
         window.speechSynthesis.cancel();
         
         const utterance = new SpeechSynthesisUtterance(text);
@@ -114,17 +124,22 @@
         utterance.pitch = 1.0;
         utterance.volume = 1.0;
         
-        // Try to use a good voice
         const voices = window.speechSynthesis.getVoices();
         const preferredVoice = voices.find(v => v.lang.startsWith('en') && v.name.includes('Google')) 
                             || voices.find(v => v.lang.startsWith('en'));
         if (preferredVoice) utterance.voice = preferredVoice;
         
+        utterance.onstart = () => { isSpeaking = true; render(); };
+        utterance.onend = () => { isSpeaking = false; render(); };
+        utterance.onerror = () => { isSpeaking = false; render(); };
+        
         window.speechSynthesis.speak(utterance);
-        return;
       }
-      
-      // Fallback to Speechify app
+    }
+
+    // Read aloud with Speechify app
+    function readAloudSpeechify() {
+      const text = `You're in ${state.location.city}, ${state.location.state}. ${AREA_DESCRIPTION}. Nearby highlights include ${LOCAL_SUGGESTIONS.map(s => s.name).join(', ')}.`;
       const encodedText = encodeURIComponent(text);
       window.location.href = `intent:#Intent;action=android.intent.action.SEND;type=text/plain;S.android.intent.extra.TEXT=${encodedText};package=com.cliffweitzman.speechify2;end`;
     }
@@ -297,11 +312,24 @@
                   <i data-lucide="info" class="w-5 h-5 text-cyan-400"></i>
                   About ${state.location?.city || 'This Area'}
                 </h3>
-                <button onclick="readAloud()" 
+                <button onclick="readAloudSystem()" 
                         class="flex items-center gap-2 px-3 py-1.5 bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 rounded-lg transition-colors">
                   <i data-lucide="volume-2" class="w-4 h-4"></i>
-                  <span class="text-sm">Read Aloud</span>
+                  <span class="text-sm">Read</span>
                 </button>
+                ${isSpeaking ? `
+                <button onclick="stopSpeaking()" 
+                        class="flex items-center gap-2 px-3 py-1.5 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg transition-colors">
+                  <i data-lucide="square" class="w-4 h-4"></i>
+                  <span class="text-sm">Stop</span>
+                </button>
+                ` : `
+                <button onclick="readAloudSpeechify()" 
+                        class="flex items-center gap-2 px-3 py-1.5 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-lg transition-colors">
+                  <i data-lucide="external-link" class="w-4 h-4"></i>
+                  <span class="text-sm">Speechify</span>
+                </button>
+                `}
               </div>
               <p class="text-slate-300 text-sm leading-relaxed">${AREA_DESCRIPTION}</p>
               <div class="flex gap-2 mt-3 flex-wrap">
